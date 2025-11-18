@@ -1,4 +1,5 @@
 from datetime import datetime as date
+import matplotlib.pyplot as plt
 estoque = []
 id_inicial= 0
 
@@ -111,6 +112,54 @@ def remover_estoque():
         print()
     else: print("Id/Nome não encontrado ou digitado incorretamente")
 
+def dashboard():
+    categorias={}
+    for i in estoque:
+        categorias[i["unidade"]] = categorias.get(i["unidade"], 0) + i["quantidade"]
+    plt.figure(figsize=(8, 6))
+    plt.pie(categorias.values(), 
+            labels=categorias.keys(), 
+            autopct="%1.1f%%")
+    plt.title("Distribuição do Estoque por Categoria")
+    plt.show()
+        
+    plt.figure(figsize=(8, 6))
+    plt.bar(categorias.keys(), 
+            categorias.values(), 
+            color='skyblue')
+    plt.title("Quantidade Total por Categoria")
+    plt.xlabel("Categoria")
+    plt.ylabel("Quantidade")
+    plt.grid(axis="y", linestyle="--", alpha=0.5)
+    plt.show()
+
+    produtos_abc = []
+    for p in estoque:
+        valor_total = p["preco"] * p["quantidade"]
+        produtos_abc.append((p["produto"], valor_total))
+
+    produtos_abc.sort(key=lambda x: x[1], reverse=True)
+
+    nomes = [p[0] for p in produtos_abc]
+    valores = [p[1] for p in produtos_abc]
+
+    soma_total = sum(valores)
+    acumulado = []
+    soma = 0
+    for v in valores:
+        soma += v
+        acumulado.append((soma / soma_total) * 100)
+    
+    plt.figure(figsize=(10, 5))
+    plt.bar(nomes, valores, color="lightgreen")
+    plt.plot(nomes, acumulado, color="red", marker="o")
+    plt.xlabel("Produtos")
+    plt.ylabel("Valor em Estoque (R$)")
+    plt.title("Curva ABC")
+    plt.xticks(rotation=45)
+    plt.grid(axis="y", linestyle="--", alpha=0.5)
+    plt.show()
+
 while True:
 
     valor= input("""
@@ -118,7 +167,7 @@ while True:
 2-Adicionar produtos.
 3-Removover produtos.
 4-Remover um item do estoque.
-5-Verificar o saldo de um produto.
+5-Dashboard
 6-Mostrar a tabela de produtos.
 7-Encerrar programa.
 """)
@@ -136,7 +185,7 @@ while True:
     elif valor ==4:
         remover_estoque()
     elif valor ==5:
-        verificar_saldo()
+        dashboard()
     elif valor ==6:
         mostrar_tabela()
     elif valor== 7:
