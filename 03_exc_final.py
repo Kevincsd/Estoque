@@ -1,7 +1,39 @@
 from datetime import datetime as date
 import matplotlib.pyplot as plt
+import sqlite3
+DB_PATH= 'estoque.db'
+conn = sqlite3.connect("estoque.db")
+cur = conn.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    categoria TEXT NOT NULL,
+    preco REAL NOT NULL,
+    quantidade INTEGER NOT NULL
+);
+""")
+
+cur.execute("SELECT * FROM items")
+linhas = cur.fetchall()
+
 estoque = []
-id_inicial= 0
+id_inicial = 0
+
+for i in linhas:
+    id_produto, nome, categoria, preco, quantidade = i
+    data_registro= date.now().strftime("%d/%m/%Y %H:%M:%S")
+    estoque.append({
+        'produto': nome,
+        'quantidade': quantidade,
+        'unidade': categoria,
+        'id_produto': id_produto,
+        'preco': preco,
+        'data-registro': data_registro
+    })
+    if id_produto > id_inicial:
+        id_inicial = id_produto
 
 def adicionar_estoque():
     global id_inicial
@@ -17,6 +49,13 @@ def adicionar_estoque():
     preco=float(input("Digite o preço do produto: "))
     estoque_atualizado= {'produto': nome, 'quantidade': quantidade, 'unidade':unidade,'id_produto': id_produto, 'preco': preco, 'data_registro': data_registro, 'ultimo_registro': ultimo_registro }
     estoque.append(estoque_atualizado)
+    
+    cur.execute("""
+        INSERT INTO items (nome, categoria, preco, quantidade)
+        VALUES (?, ?, ?, ?)
+    """, (nome, unidade, preco, quantidade))
+    
+    conn.commit()
 
 def atualizar_estoque():
     if not estoque:
@@ -38,19 +77,30 @@ def atualizar_estoque():
         print("O produto", achado['produto'], "foi encontrado! A quantidade atual dele é igual a ", achado['quantidade'])
         aumento = int(input("Digite a quantidade que deseja adicionar: "))
         achado['quantidade'] += aumento
+
+        cur.execute("""
+            UPDATE items
+            SET quantidade = ?
+            WHERE id = ? OR nome = ?
+        """, (achado['quantidade'], achado['id_produto'], achado['produto']))
+
+        conn.commit()
+        
     else:print("Id/Nome não encontrado ou digitado incorretamente: ")
 
 def mostrar_tabela():
-    if not estoque:
+    cur.execute("SELECT * FROM items")
+    linhas = cur.fetchall()
+    if not linhas:
         print("Não há produtos no estoque!")
         return
-    print("-"*44, "Produtos Cadastrados","-"*44)
-    print(f"{'ID':<4} {'Nome':<20} {'Categoria':<15} {'Preço':<10} {'Qtd':<5} {'Primerio registro':<20} {'Último Registro':<20} {'Status'}")
-    print("-"*110)
-    for i in estoque:
-        status= "Baixo" if i['quantidade'] <= 5 else "OK"
-        print(f"{i['id_produto']:<4} {i['produto']:<20} {i['unidade']:<15} {i['preco']:<10} {i['quantidade']:<5} {i['data_registro']:<20} {i['ultimo_registro']:<20}, {status}")
-
+    print("-"*25, "Produtos Cadastrados","-"*23)
+    print(f"{'ID':<4} {'Nome':<20} {'Categoria':<15} {'Preço':<10} {'Qtd':<5} {'Status'}")
+    print("-"*70)
+    for linha in linhas:
+        id_produto, nome, categoria, preco, quantidade = linha
+        status = "Baixo" if quantidade <= 5 else "OK"
+        print(f"{id_produto:<4} {nome:<20} {categoria:<15} {preco:<10.2f} {quantidade:<5} {status}")
 def retirar_estoque():
     if not estoque:
         print("Não há produtos no estoque!")
@@ -72,6 +122,12 @@ def retirar_estoque():
         remover= int(input("Quanto deseja remover do estoque?: "))
         retirar['quantidade'] -= remover
         print("A quantidade final ficou igual a: ", retirar['quantidade'])
+        cur.execute("""
+            UPDATE items
+            SET quantidade = ?
+            WHERE id = ?
+        """, (retirar['quantidade'], retirar['id_produto']))
+        conn.commit()
     else:print("Id/Nome não encontrado ou digitado incorretamente")
 
 def verificar_saldo():
@@ -105,6 +161,8 @@ def remover_estoque():
         pass
     for i in estoque:
         if i['produto'] == verifica or i["id_produto"] == verifica:
+            cur.execute("DELETE FROM items WHERE id = ?", (i['id_produto'],))
+            conn.commit()
             estoque.remove(i)
             print("O produto", i['produto'], "foi removido!")
             validar= True
