@@ -1,10 +1,33 @@
-# Estoque
-
-Objetivo da Atividade
+Sistema de Cadastro de Produtos (Mini-ERP)
+🎯 Objetivo da Atividade
 
 Desenvolver um programa que simule o módulo de estoque de um ERP, permitindo ao usuário cadastrar, excluir, listar e visualizar relatórios de produtos.
 
 O sistema aplica conceitos de gestão de estoque, como controle de movimentações e geração de relatórios gerenciais.
+
+📝 Contextualização
+
+Nos sistemas ERP (Enterprise Resource Planning), o módulo de estoque é essencial para:
+
+Controlar produtos.
+
+Evitar perdas e faltas de estoque.
+
+Melhorar o planejamento de compras e produção.
+
+Funções típicas do módulo de estoque:
+
+Cadastro de produtos (nome, categoria, preço, quantidade).
+
+Movimentação de estoque (entrada e saída).
+
+Relatórios gerenciais (ex.: evolução do estoque, curva ABC de custos).
+
+Dashboard com gráficos de acompanhamento (opcional, para visualização de categorias, evolução, etc.).
+
+Nesta atividade, você irá criar um mini-ERP de estoque, simulando essas funcionalidades em um programa.
+
+🛠️ Funcionalidades
 
 O sistema oferece um menu interativo com as seguintes opções:
 
@@ -36,26 +59,12 @@ Sair do programa
 
 Encerrar a execução.
 
-Tecnologias Utilizadas
+💾 Tecnologias Utilizadas
 
 Linguagem: Python 3
 
 Banco de dados: SQLite
 
-Biblioteca para gráficos: matplotlib
+Biblioteca para datas: datetime
 
-Como Executar
-
-Clone o repositório:
-
-git clone https://github.com/seu-usuario/nome-do-repositorio.git
-
-
-Entre na pasta do projeto:
-
-cd nome-do-repositorio
-
-
-Execute o programa:
-
-python main.py
+Biblioteca para gráficos (opcional): matplotlib
